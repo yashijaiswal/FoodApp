@@ -21,7 +21,7 @@ public class Zones {
 	@Column(name="locality")
 	private String locality;
 	
-	@Column(name="zoneArea")
+	@Column(name="zonearea")
 	private String zoneArea;
 
 	public String getZoneArea() {
