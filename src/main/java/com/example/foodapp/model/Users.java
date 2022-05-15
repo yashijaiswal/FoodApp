@@ -19,18 +19,25 @@ public class Users {
     @GeneratedValue
 	@Column(name="userid")
 	private int userId;
+	
 	@Column(name="username")
 	private String userName;
+	
 	@Column(name="gender")
 	private String gender;
+	
 	@Column(name="dob")
 	private LocalDate dob;
+	
 	@Column(name="contact")
 	private long contact;
+	
 	@Column(name="accid")
 	private int accId;
+	
 	@Column(name="adressid")
 	private int addressId;
+	
 	public int getUserId() {
 		return userId;
 	}
