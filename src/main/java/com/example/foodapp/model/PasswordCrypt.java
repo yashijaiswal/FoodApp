@@ -3,6 +3,9 @@ package com.example.foodapp.model;
 import java.util.Base64;
 import java.util.Base64.Encoder;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class PasswordCrypt {
 
 	public String converttHash(final String password) {

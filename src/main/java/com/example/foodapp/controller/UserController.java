@@ -1,7 +1,6 @@
 package com.example.foodapp.controller;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 
@@ -83,11 +82,6 @@ public class UserController {
 				String username = userJson.get("username").asText();
 				String password = userJson.get("password").asText();
 				String email = userJson.get("email").asText();
-				DateTimeFormatter createDateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
-				LocalDateTime created_on = LocalDateTime.parse(userJson.get("created_on").asText(),
-						createDateFormatter);
-				LocalDateTime last_login = LocalDateTime.parse(userJson.get("last_login").asText(),
-						createDateFormatter);
 				String cities = userJson.get("city").asText();
 				String locality = userJson.get("locality").asText();
 				String name = userJson.get("name").asText();
@@ -98,9 +92,7 @@ public class UserController {
 
 				String encodedPassword = pwdCrypt.converttHash(password);
 				Account acc = new Account();
-				acc.setCreatedOn(created_on);
 				acc.setEmailId(email);
-				acc.setLastLogin(last_login);
 				acc.setPassword(encodedPassword);
 				acc.setUserName(username);
 

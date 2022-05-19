@@ -1,7 +1,5 @@
 package com.example.foodapp.model;
 
-import java.time.LocalDateTime;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -29,12 +27,6 @@ public class Account {
 	@Column(name="emailid")
 	private String emailId;
 	
-	@Column(name="createdon")
-	private LocalDateTime createdOn;
-	
-	@Column(name="lastlogin")
-	private LocalDateTime lastLogin;
-	
 	public int getAccId() {
 		return accId;
 	}
@@ -59,19 +51,7 @@ public class Account {
 	public void setEmailId(String emailId) {
 		this.emailId = emailId;
 	}
-	public LocalDateTime getCreatedOn() {
-		return createdOn;
-	}
-	public void setCreatedOn(LocalDateTime createdOn) {
-		this.createdOn = createdOn;
-	}
-	public LocalDateTime getLastLogin() {
-		return lastLogin;
-	}
-	public void setLastLogin(LocalDateTime lastLogin) {
-		this.lastLogin = lastLogin;
-	}
-	
+
 	
 
 }

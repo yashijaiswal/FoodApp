@@ -6,8 +6,6 @@ import org.springframework.stereotype.Service;
 import com.example.foodapp.model.City;
 import com.example.foodapp.repository.CityRepository;
 
-
-
 @Service
 public class CityService {
 	@Autowired
