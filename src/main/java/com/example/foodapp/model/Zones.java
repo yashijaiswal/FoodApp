@@ -6,22 +6,23 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 @Entity
-@Table(name="zones", schema="foodapp")
+@Table(name = "zones", schema = "foodapp")
 public class Zones {
-	
+
 	@Id
-    @GeneratedValue
-	@Column(name="zoneid")
+	@GeneratedValue
+	@Column(name = "zoneid")
 	private int zoneId;
-	
-	@Column(name="locality")
+
+	@Column(name = "locality")
 	private String locality;
-	
-	@Column(name="zonearea")
+
+	@Column(name = "zonearea")
 	private String zoneArea;
 
 	public String getZoneArea() {
@@ -47,7 +48,5 @@ public class Zones {
 	public void setLocality(String locality) {
 		this.locality = locality;
 	}
-	
-	
 
 }
