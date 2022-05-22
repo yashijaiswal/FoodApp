@@ -27,6 +27,15 @@ public class Account {
 	@Column(name="emailid")
 	private String emailId;
 	
+	@Column(name="roles")
+	private String roles;
+	
+	public String getRoles() {
+		return roles;
+	}
+	public void setRoles(String roles) {
+		this.roles = roles;
+	}
 	public int getAccId() {
 		return accId;
 	}

@@ -29,6 +29,7 @@ import com.example.foodapp.model.Account;
 import com.example.foodapp.model.City;
 import com.example.foodapp.model.PasswordCrypt;
 import com.example.foodapp.model.UserAddress;
+import com.example.foodapp.model.UserAuth;
 import com.example.foodapp.model.Users;
 import com.example.foodapp.service.CityService;
 import com.example.foodapp.service.UserAddressService;
@@ -39,13 +40,12 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-
 @RestController
 @Component
 public class UserController {
-	
+
 	public static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
-	
+
 	@Autowired
 	private UsersService userService;
 
@@ -60,6 +60,8 @@ public class UserController {
 
 	@Autowired
 	RestTemplate restTemplate;
+
+	private static final String USER_ROLE = "USER";
 
 	@GetMapping(path = "/")
 	public String welcome() {
@@ -78,9 +80,9 @@ public class UserController {
 					&& !userJson.get("city").isNull() && !userJson.get("locality").isNull()
 					&& !userJson.get("name").isNull() && !userJson.get("contact").isNull()
 					&& userJson.get("contact").asText().length() == 10) {
-				LOGGER.info("ALL VALIDATION SUCCESSFUL FOR {}",  userJson.get("username").asText());
+				LOGGER.info("ALL VALIDATION SUCCESSFUL FOR {}", userJson.get("username").asText());
 				String username = userJson.get("username").asText();
-				String password = userJson.get("password").asText();
+				String password = pwdCrypt.converttHash(userJson.get("password").asText());
 				String email = userJson.get("email").asText();
 				String cities = userJson.get("city").asText();
 				String locality = userJson.get("locality").asText();
@@ -90,11 +92,11 @@ public class UserController {
 				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 				LocalDate dob = LocalDate.parse(userJson.get("dob").asText(), formatter);
 
-				String encodedPassword = pwdCrypt.converttHash(password);
 				Account acc = new Account();
 				acc.setEmailId(email);
-				acc.setPassword(encodedPassword);
+				acc.setPassword(password);
 				acc.setUserName(username);
+				acc.setRoles(USER_ROLE);
 
 				int id = userService.addAccount(acc);
 				int zoneId = zoneService.getZoneId(locality);
@@ -128,15 +130,26 @@ public class UserController {
 		} catch (Exception e) {
 			LOGGER.error("ERROR MESSAGE {}", e.getMessage());
 			e.printStackTrace();
-		}finally {
+		} finally {
 			System.out.println("AddUser Controller");
 		}
 		return "Field is Null value";
 	}
 
 	@PostMapping(path = "/validateUser")
-	public String validateUserAccount(@RequestBody JsonNode userJson) {
-		return null;
+	public UserAuth validateUserAccount(@RequestBody JsonNode userJson) throws Exception {
+
+		if (!userJson.isNull() && !userJson.get("username").isNull() && !userJson.get("password").isNull()) {
+			UserAuth userAuth = userService.validateUser(userJson.get("username").asText(),
+					userJson.get("password").asText());
+			if (userAuth != null) {
+				return userAuth;
+			} else
+				throw new Exception("Invalid username/password");
+
+		} else
+			throw new Exception("Invalid username/password");
+
 	}
 
 	@GetMapping("/getRestaurantsForUserLocality")
