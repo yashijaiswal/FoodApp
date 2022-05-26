@@ -138,10 +138,17 @@ public class UserController {
 
 	@PostMapping(path = "/validateUser")
 	public UserAuth validateUserAccount(@RequestBody JsonNode userJson) throws Exception {
-
+		
 		if (!userJson.isNull() && !userJson.get("username").isNull() && !userJson.get("password").isNull()) {
-			UserAuth userAuth = userService.validateUser(userJson.get("username").asText(),
-					userJson.get("password").asText());
+			/*
+			 * TODO LATER
+			 * try { authenticationManager.authenticate(new
+			 * UsernamePasswordAuthenticationToken( userJson.get("username").asText(),
+			 * pwdCrypt.converttHash(userJson.get("password").asText()))); } catch
+			 * (BadCredentialsException ex) { throw new
+			 * Exception("Invalid username or password"); }
+			 */
+			UserAuth userAuth = userService.validateUser(userJson.get("username").asText(), userJson.get("password").asText());
 			if (userAuth != null) {
 				return userAuth;
 			} else

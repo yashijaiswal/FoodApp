@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -17,6 +18,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.example.foodapp.service.SecurityService;
 
@@ -26,6 +28,7 @@ import io.jsonwebtoken.Jwts;
 @Component
 public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 
+	@Value("${jwt.secret}")
 	private String jwtSecret;
 
 	@Autowired
@@ -34,7 +37,7 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 	public void setJwtSecret(String s) {
 		this.jwtSecret = s;
 	}
-	
+
 	public JwtAuthenticationFilter(AuthenticationManager authenticationManager) {
 		super(authenticationManager);
 	}
@@ -43,16 +46,19 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
 
-		if (request.getRequestURI().startsWith("/addUserAccount") || request.getRequestURI().startsWith("/validateUser")
-				|| request.getRequestURI().startsWith("/swagger")
-				|| request.getRequestURI().startsWith("/webjars/springfox-swagger-ui")) {
-
-			chain.doFilter(request, response);
-			return;
-		}
+		UsernamePasswordAuthenticationToken authentication = null;
+		String token = request.getHeader("Authorization");
 		try {
-			UsernamePasswordAuthenticationToken authentication = getAuthentication(request);
-			SecurityContextHolder.getContext().setAuthentication(authentication);
+			if (token != null) {
+				authentication = getAuthentication(token);
+				SecurityContextHolder.getContext().setAuthentication(authentication);
+			}
+			/*
+			 * if (SecurityContextHolder.getContext().getAuthentication() != null) {
+			 * 
+			 * } else { logger.debug("Missing Authorization Header"); throw new
+			 * AuthenticationException("Missing Authorization Header"); }
+			 */
 		} catch (Exception e) {
 			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
 			return;
@@ -65,31 +71,24 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 		}
 	}
 
-	private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request)
-			throws AuthenticationException {
+	private UsernamePasswordAuthenticationToken getAuthentication(String token) throws AuthenticationException {
 
-		String token = request.getHeader("Authorization");
+		final Claims claims = Jwts.parser().setSigningKey(jwtSecret.getBytes())
+				.parseClaimsJws(token.replace("Bearer ", "")).getBody();
 
-		if (token != null) {
-			final Claims claims = Jwts.parser().setSigningKey(jwtSecret.getBytes())
-					.parseClaimsJws(token.replace("Bearer ", "")).getBody();
+		String username = claims.getSubject();
 
-			String username = claims.getSubject();
+		if (username != null) {
+			ArrayList<GrantedAuthority> authorities = new ArrayList<>();
+			authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
 
-			if (username != null) {
-				ArrayList<GrantedAuthority> authorities = new ArrayList<>();
-				authorities.add(new SimpleGrantedAuthority("USER"));
-
-				String userToken = secService.getUserToken(username);
-				if (token.equals(userToken)) {
-					return new UsernamePasswordAuthenticationToken(username, null, authorities);
-				} else
-					return null;
-			}
-			throw new AuthenticationException("Failed to find user in Subject");
+			String userToken = secService.getUserToken(username);
+			if (token.equals(userToken)) {
+				return new UsernamePasswordAuthenticationToken(username, null, authorities);
+			} else
+				throw new AuthenticationException("Invalid Token found");
 		}
-		logger.debug("Missing Authorization Header");
-		throw new AuthenticationException("Missing Authorization Header");
+		throw new AuthenticationException("Failed to find user in Subject");
 
 	}
 

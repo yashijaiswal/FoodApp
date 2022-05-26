@@ -27,16 +27,22 @@ public class SecurityService {
 
 	public UserAuth storeTokenInCache(String username, int accid) {
 
+		UserAuth usr = null;
 		String jwtToken = Jwts.builder().setSubject(username)
 				.setExpiration(new Date(System.currentTimeMillis() + Long.parseLong(this.expirationTime)))
 				.signWith(SignatureAlgorithm.HS512, this.jwtSecret.getBytes()).compact();
-		UserAuth userAuth = new UserAuth();
-		userAuth.setUserName(username);
-		userAuth.setUserToken(jwtToken);
-		userAuth.setAccId(accid);
-		UserAuth usr = userAuthRepository.save(userAuth);
+		List<UserAuth> usrList = userAuthRepository.findByUserName(username);
+		
+		if (usrList != null && usrList.size() != 0) {
+			usr = usrList.get(0);
+		} else {
+			UserAuth userAuth = new UserAuth();
+			userAuth.setUserName(username);
+			userAuth.setUserToken(jwtToken);
+			userAuth.setAccId(accid);
+			usr = userAuthRepository.save(userAuth);
+		}
 		return usr;
-
 	}
 
 	public String getUserToken(String username) {
